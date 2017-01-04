@@ -28,6 +28,12 @@
 		<input type="radio" value="bandpass" ng-model="filterType" ng-change="$ctrl.setFilter(800, filterType)">
 	</div>-->
 	<div>
+		<label>Filter Type: {{filterType}}</label>
+		<input type="radio" value="highpass" ng-model="filterType" ng-change="$ctrl.synth.filter.type = filterType">
+		<input type="radio" value="lowpass" ng-model="filterType" ng-change="$ctrl.synth.filter.type = filterType">
+		<input type="radio" value="bandpass" ng-model="filterType" ng-change="$ctrl.synth.filter.type = filterType">
+	</div>
+	<div>
 		<label>Portamento</label>
 		<input type="range" min="0" max="2" ng-init="newPorta=0.2" step="0.1" ng-model="newPorta" ng-change="$ctrl.synth.set('portamento', newPorta)">{{newPorta}}
 	</div>

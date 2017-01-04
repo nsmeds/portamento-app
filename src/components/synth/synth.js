@@ -92,7 +92,17 @@ function controller() {
         'oscillator': {
             'partials': [0, 2, 3, 4],
         }
-    }).toMaster();
+    });
+    
+    // this.setFilter = function(freq, type) {
+    this.synth.filter = new Tone.Filter({
+        'type': 'highpass',
+        'frequency': 8000
+    });
+    // this.synth['filter'] = this.filter;
+    // };
+
+    this.synth.toMaster();
 
     // const notes = ['E3', 'D3', 'C3', 'D3', 'E3', 'E3', 'E3'];
     // var counter = 0;
@@ -114,6 +124,7 @@ function controller() {
     // var noteNames = ['F#', 'E', 'C#', 'A'];
     // const sequencematrix = [[0,0,0,1],[0,0,0,1],[0,0,0,1],[0,0,0,1]];
     // var sequencematrix = document.getElementById('sequencematrix'); 
+
 
     var synth = this.synth;
 
@@ -162,10 +173,6 @@ function controller() {
         this.synth.triggerRelease(note);
     };
 
-    this.setFilter = function(freq, type) {
-        const filter = new Tone.Filter(freq, type);
-        this.synth['filter'] = filter;
-    };
 
     this.keyDown = function($event) {
         $event.preventDefault();
