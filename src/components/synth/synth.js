@@ -64,7 +64,16 @@ function controller(patchService, sequenceService, userService, $window) {
                 sustain: 1,
                 release: .5
             },
-            portamento: .2
+            portamento: .2,
+            filter: {
+                frequency: 5000,
+                type: 'allpass',
+                Q: 1
+            },
+            combFilter: {
+                delayTime: 0,
+                resonance: 0
+            }
         },
     };
 
@@ -78,7 +87,16 @@ function controller(patchService, sequenceService, userService, $window) {
                 sustain: this.patch.settings.envelope.sustain,
                 release: this.patch.settings.envelope.release
             },
-            portamento: this.patch.settings.portamento
+            portamento: this.patch.settings.portamento,
+            filter: {
+                frequency: this.patch.settings.filter.frequency,
+                type: this.patch.settings.filter.type,
+                Q: this.patch.settings.filter.Q
+            },
+            combFilter: {
+                delayTime: this.patch.settings.combFilter.delayTime,
+                resonance: this.patch.settings.combFilter.resonance
+            }
         });
         // this.loadSequence(this.patch._id);
     };
