@@ -5,7 +5,7 @@ import styles from './synth.scss';
 export default {
     template,
     bindings: {
-        currentUser: '<',
+        currentUser: '=',
         userPatches: '<',
         favPatches: '<',
         loadedPatch: '<'
@@ -19,22 +19,25 @@ function controller(patchService, sequenceService, userService, $window) {
     const doc = $window.document;
 
     this.$onInit = () => {
-        console.log('in on init ', this.loadedPatch);
-        
+        this.loginPrompt = false;
+        this.saveFeedback = false;
+    
         if(this.loadedPatch) {
             this.favorited = false;
             this.patch = this.loadedPatch;
             this.setSynth();
             this.patchSaved = true;
             this.loadSequence(this.patch._id);
-            userService.getUserById(this.currentUser.id)
-                .then(user => {
-                    user.favoriteId.forEach(obj => {
-                        if(obj._id === this.patch._id) {
-                            this.favorited = true;
-                        }
+            if (this.currentUser) {
+                userService.getUserById(this.currentUser.id)
+                    .then(user => {
+                        user.favoriteId.forEach(obj => {
+                            if(obj._id === this.patch._id) {
+                                this.favorited = true;
+                            }
+                        });
                     });
-                });
+            }
         }
 
         doc.addEventListener('keydown', this.keyDownHandler);
@@ -45,12 +48,9 @@ function controller(patchService, sequenceService, userService, $window) {
     this.$onDestroy = () => {
         doc.removeEventListener('keydown', this.keyDownHandler);
         doc.removeEventListener('keyup', this.keyUpHandler);
+        this.stopLoop();
     };
-  
-    // this.mockId = '586d6567c5e57c0e906ad3c9'; //Will's
-    // this.mockId = '586bda97f5977d80498b0883'; //Andy's
-    // this.mockId = '586d98b95a9cca386d70b9aa'; //Tom's'
-    
+     
     this.upVoted = false;
     this.patchSaved = false;
     //load default patch if patch not resolved in state
@@ -78,7 +78,6 @@ function controller(patchService, sequenceService, userService, $window) {
     };
 
     this.setSynth = () => {
-        console.log('from set synth', this.patch);
         this.synth.set({
             oscillator: {type: this.patch.settings.wave},
             envelope: {
@@ -102,13 +101,18 @@ function controller(patchService, sequenceService, userService, $window) {
     };
 
     this.savePatch = () => {
+        this.favorited = false;
+        if(!this.currentUser) {
+            this.loginPrompt = true;
+            return;
+        }
         if(this.patch._id) {
             delete this.patch._id;
         }
         this.patch.userId = this.currentUser.id;
         patchService.add(this.patch)
             .then(res => {
-                this.patchId = res._id;
+                this.patch._id = res._id;
                 this.userPatches.push(res);
                 return res;
             })
@@ -122,12 +126,14 @@ function controller(patchService, sequenceService, userService, $window) {
             })
             .then(() => userService.getUserById(this.currentUser.id))
             .then(user => {
-                user.patchId.push(this.patchId);
+                user.patchId.push(this.patch._id);
                 return user;
             })
             .then(user => userService.updateUser(user._id, user));
 
+        this.saveFeedback = true;
         this.patchSaved = true;
+        document.getElementById('save').reset(); //eslint-disable-line
     };
     
     this.vote = (number) => {
@@ -145,10 +151,14 @@ function controller(patchService, sequenceService, userService, $window) {
         this.favorited = true;
         if(!this.patch.favorites) this.patch.favorites = 0;
         this.patch.favorites += 1;
+        console.log(this.patch);
         patchService.update(this.patch._id, this.patch)
-            .then(() => {
+            .then(res => {
+                this.favPatches.push(res);
+                console.log('in first then');
                 userService.getUserById(this.currentUser.id)
                     .then(user => {
+                        console.log('user', user);
                         user.favoriteId.push(this.patch._id);
                         userService.updateUser(this.currentUser.id, user);
                     });
@@ -337,8 +347,10 @@ function controller(patchService, sequenceService, userService, $window) {
     const fired = {};
 
     this.keyDown = function($event) {
-        console.log($event.keyCode);
-        if ($event.target.tagName.toLowerCase() === 'input') return;
+        const target = $event.target;
+        if (target.tagName.toLowerCase() === 'input' && target.type === 'text') return;
+        if (target.tagName.toLowerCase() === 'input' && target.type === 'password') return;
+        if ($event.altKey || $event.ctrlKey || $event.metaKey) return;
         if (!fired[$event.keyCode]) {
             fired[$event.keyCode] = true;
             $event.preventDefault();
@@ -349,6 +361,7 @@ function controller(patchService, sequenceService, userService, $window) {
     };
 
     this.keyUp = function($event) {
+        if (($event.keyCode === 91) || ($event.keyCode === 18) || ($event.keyCode === 17) || ($event.keyCode === 93)) return;
         fired[$event.keyCode] = false;
         $event.preventDefault();
         //following line works

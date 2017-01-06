@@ -21,8 +21,12 @@ export default function userService($http, apiUrl, $window) {
         updateUser(userId, updatedUser) {
             return $http.put(`${apiUrl}/users/${userId}`, updatedUser);
         },
-        getByFollowed() {
-            return $http.get(`${apiUrl}/users/followed`)
+        getByFollowers() {
+            return $http.get(`${apiUrl}/users/followers`)
+                .then(res => res.data);
+        },
+        getRecent() {
+            return $http.get(`${apiUrl}/users/recent`)
                 .then(res => res.data);
         }  
     };
