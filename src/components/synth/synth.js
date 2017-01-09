@@ -64,16 +64,35 @@ function controller(patchService, sequenceService, userService, $window) {
                 sustain: 1,
                 release: .5
             },
-            portamento: 0
-        },
-        filter: {
-            type: 'lowpass',
-            frequency: {
-                value: 2500
+            portamento: 0,
+            filter: {
+                type: 'lowpass',
+                frequency: {
+                    value: 2500
+                },
+                Q: {
+                    value: 1
+                }
             },
-            Q: 1
-        }
+            combFilter: {
+                delayTime: 0,
+                resonance: 0
+            }
+        },
     };
+
+    this.filter = new Tone.Filter().toMaster();
+    this.combFilter = new Tone.FeedbackCombFilter(0, 0).toMaster();
+
+    this.synth = new Tone.PolySynth(6, Tone.Synth, {
+        // 'oscillator': {
+        //     'partials': [0, 2, 3, 4],
+        //     'type': 'sawtooth'
+        // }
+    });
+
+    this.synth.chain(this.filter, this.combFilter, Tone.Master);
+
 
     this.setSynth = () => {
         this.synth.set({
@@ -86,12 +105,23 @@ function controller(patchService, sequenceService, userService, $window) {
             },
             portamento: this.patch.settings.portamento
         });
+        console.log('this.filter', this.filter);
+        console.log('this.filter.type', this.filter.type);
+        console.log('this.filter.frequency.value', this.filter.frequency.value);
+        console.log('this.filter.Q', this.filter.Q);
+        console.log('this.patch.settings', this.patch.settings);
+        console.log('this.patch.settings.filter', this.patch.settings.filter);
+        console.log('this.patch.settings.combFilter', this.patch.settings.combFilter);
+        console.log('this.patch.settings.envelope', this.patch.settings.envelope);
         this.filter.set({
+            // filter: {type: this.patch.settings.filter.type},
             type: this.patch.settings.filter.type,
             frequency: {
-                value: this.patch.settings.filter.frequency
+                value: this.patch.settings.filter.frequency.value
             },
-            Q: this.patch.settings.filter.Q
+            Q: {
+                value: this.patch.settings.filter.Q
+            }
         });
     };
 
@@ -259,18 +289,6 @@ function controller(patchService, sequenceService, userService, $window) {
         }
     ];
    
-    this.filter = new Tone.Filter().toMaster();
-    this.combFilter = new Tone.FeedbackCombFilter(0, 0).toMaster();
-
-    this.synth = new Tone.PolySynth(6, Tone.Synth, {
-        'oscillator': {
-            'partials': [0, 2, 3, 4],
-            'type': 'sawtooth'
-        }
-    });
-
-    this.synth.chain(this.filter, this.combFilter, Tone.Master);
-
     this.updateMatrix = function(col, row) {
         if(this.sequenceMatrix[col][row] === 1) this.sequenceMatrix[col][row] = 0;
         else this.sequenceMatrix[col][row] = 1;
@@ -318,10 +336,10 @@ function controller(patchService, sequenceService, userService, $window) {
         this.synth.triggerRelease(note);
     };
 
-    this.setFilter = function(freq, type) {
-        const filter = new Tone.Filter(freq, type);
-        this.synth['filter'] = filter;
-    };
+    // this.setFilter = function(freq, type) {
+    //     const filter = new Tone.Filter(freq, type);
+    //     this.synth['filter'] = filter;
+    // };
 
     this.unFocus = function($event) {
         $event.target.blur();
