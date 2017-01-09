@@ -52,7 +52,7 @@
 		</div>
 		<div class="panel-div" id="filter-control">
 			<h4>Filter Control:</h4>
-			Frequency: {{filterFreq}}<input min="200" max="5000" step="100" type="range" value="filterFreq" ng-model="filterFreq" ng-change="$ctrl.filter.set('frequency', filterFreq)">
+			Frequency: {{$ctrl.patch.settings.filter.frequency}}<input min="200" max="5000" step="100" type="range" value="$ctrl.patch.settings.filter.frequency" ng-model="$ctrl.patch.settings.filter.frequency" ng-change="$ctrl.filter.set('frequency.value', $ctrl.patch.settings.filter.frequency)">
 			Q: {{filterQ}}<input type="range" min="1" max="20" step="0.5" ng-init="filterQ=1" value="Q" ng-model="filterQ" ng-change="$ctrl.filter.set('Q', filterQ)">
 			<h4>Comb Filter:</h4>
 			Comb Filter Delay: {{combFilterDelay}}<input type="range" min="0" max="1" step="0.1" ng-init="combFilterDelay=0" value="combFilterDelay" ng-model="combFilterDelay" ng-change="$ctrl.combFilter.set('delayTime', combFilterDelay)">

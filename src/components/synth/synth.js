@@ -66,6 +66,13 @@ function controller(patchService, sequenceService, userService, $window) {
             },
             portamento: 0
         },
+        filter: {
+            type: 'lowpass',
+            frequency: {
+                value: 2500
+            },
+            Q: 1
+        }
     };
 
     this.setSynth = () => {
@@ -78,6 +85,13 @@ function controller(patchService, sequenceService, userService, $window) {
                 release: this.patch.settings.envelope.release
             },
             portamento: this.patch.settings.portamento
+        });
+        this.filter.set({
+            type: this.patch.settings.filter.type,
+            frequency: {
+                value: this.patch.settings.filter.frequency
+            },
+            Q: this.patch.settings.filter.Q
         });
     };
 
